@@ -7,7 +7,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES := cryptfs.cpp
 LOCAL_SHARED_LIBRARIES := libcrypto libhardware libcutils libstdc++
 LOCAL_STATIC_LIBRARIES := libscrypttwrp_static
-LOCAL_C_INCLUDES := external/openssl/include $(commands_recovery_local_path)/crypto/scrypt/lib/crypto
+LOCAL_C_INCLUDES := external/openssl/include $(commands_recovery_local_path)/crypto/scrypt/lib/crypto vendor/qcom/opensource/cryptfs_hw/
 ifeq ($(shell test $(PLATFORM_SDK_VERSION) -lt 23; echo $$?),0)
     LOCAL_C_INCLUDES += bionic external/stlport/stlport
     LOCAL_SHARED_LIBRARIES += libstlport
