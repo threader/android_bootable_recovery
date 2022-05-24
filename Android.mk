@@ -77,8 +77,8 @@ LOCAL_SRC_FILES := \
     twrpApex.cpp \
     twrpRepacker.cpp
 
-LOCAL_STATIC_LIBRARIES += libavb libtwrpinstall
-LOCAL_SHARED_LIBRARIES += libfs_mgr libinit
+LOCAL_STATIC_LIBRARIES += libavb libtwrpinstall libinit
+LOCAL_SHARED_LIBRARIES += libfs_mgr
 LOCAL_C_INCLUDES += \
     system/core/fs_mgr/libfs_avb/include/ \
     system/core/fs_mgr/include_fstab/ \
@@ -122,9 +122,9 @@ LOCAL_C_INCLUDES += \
     $(LOCAL_PATH)/install/include \
     $(LOCAL_PATH)/twrpinstall/include
 
-LOCAL_STATIC_LIBRARIES += libguitwrp
+LOCAL_STATIC_LIBRARIES += libguitwrp libinit
 LOCAL_SHARED_LIBRARIES += libz libc libcutils libstdc++ libtar libblkid libminuitwrp libminadbd libmtdutils libtwadbbu libbootloader_message
-LOCAL_SHARED_LIBRARIES += libcrecovery libtwrpdigest libc++ libaosprecovery libinit libcrypto libbase libziparchive libselinux
+LOCAL_SHARED_LIBRARIES += libcrecovery libtwrpdigest libc++ libaosprecovery libcrypto libbase libziparchive libselinux
 
 ifneq ($(wildcard system/core/libsparse/Android.mk),)
 LOCAL_SHARED_LIBRARIES += libsparse
