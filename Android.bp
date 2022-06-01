@@ -16,5 +16,8 @@ cc_defaults {
         "-Wall",
         "-Werror",
     ],
+   static_libs: [
+        "libc++fs"
+    ],
     cpp_std: "c++17",
 }
