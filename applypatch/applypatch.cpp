@@ -40,12 +40,12 @@
 #include <android-base/unique_fd.h>
 #include <openssl/sha.h>
 
-#include "bmlutils/bmlutils.h"
-#include "mtdutils/mtdutils.h"
+#include "../bmlutils/bmlutils.h"
+#include "../mtdutils/mtdutils.h"
 
-#include "edify/expr.h"
-#include "otautil/paths.h"
-#include "otautil/print_sha1.h"
+#include "../edify/include/edify/expr.h"
+#include "../otautil/include/otautil/paths.h"
+#include "../otautil/include/otautil/print_sha1.h"
 
 using namespace std::string_literals;
 
@@ -141,6 +141,10 @@ static bool WriteBufferToPartition(const FileContents& file_contents, const Part
   size_t len = file_contents.data.size();
   size_t start = 0;
   bool success = false;
+unsigned char buffer[4096];
+
+
+
   for (size_t attempt = 0; attempt < 2; ++attempt) {
     android::base::unique_fd fd(open(partition.name.c_str(), O_RDWR));
     if (fd == -1) {
@@ -189,8 +193,12 @@ static bool WriteBufferToPartition(const FileContents& file_contents, const Part
       return false;
     }
 
-    const char* partition = pieces[1].c_str();
-
+                for (size_t p = 0; p < len; p += sizeof(buffer)) {
+                    size_t to_read = len - p;
+                    if (to_read > sizeof(buffer)) {
+                        to_read = sizeof(buffer);
+                    }
+if (!android::base::ReadFully(fd, buffer, to_read)) {
         PLOG(ERROR) << "Failed to verify-read " << partition << " at " << p;
         return false;
       }
@@ -405,6 +413,12 @@ static bool GenerateTarget(const Partition& target, const FileContents& source_f
   LOG(INFO) << "  now " << short_sha1(expected_sha1);
 
   // Write back the temp file to the partition.
+
+  // Success!
+  return true;
+}
+
+std::string Partition::ToString() const {
   if (*this) {
     return "EMMC:"s + name + ":" + std::to_string(size) + ":" + hash;
   }
