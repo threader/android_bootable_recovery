@@ -143,8 +143,6 @@ static bool WriteBufferToPartition(const FileContents& file_contents, const Part
   bool success = false;
 unsigned char buffer[4096];
 
-
-
   for (size_t attempt = 0; attempt < 2; ++attempt) {
     android::base::unique_fd fd(open(partition.name.c_str(), O_RDWR));
     if (fd == -1) {
@@ -192,6 +190,7 @@ unsigned char buffer[4096];
       PLOG(ERROR) << "Failed to seek to 0 on " << partition;
       return false;
     }
+
 
                 for (size_t p = 0; p < len; p += sizeof(buffer)) {
                     size_t to_read = len - p;
@@ -416,6 +415,27 @@ static bool GenerateTarget(const Partition& target, const FileContents& source_f
 
   // Success!
   return true;
+}
+
+bool CheckPartition(const Partition& partition) {
+  FileContents target_file;
+  return ReadPartitionToBuffer(partition, &target_file, false);
+}
+
+Partition Partition::Parse(const std::string& input_str, std::string* err) {
+  std::vector<std::string> pieces = android::base::Split(input_str, ":");
+  if (pieces.size() != 4 || pieces[0] != "EMMC") {
+    *err = "Invalid number of tokens or non-eMMC target";
+    return {};
+  }
+
+  size_t size;
+  if (!android::base::ParseUint(pieces[2], &size) || size == 0) {
+    *err = "Failed to parse \"" + pieces[2] + "\" as byte count";
+    return {};
+  }
+
+  return Partition(pieces[1], size, pieces[3]);
 }
 
 std::string Partition::ToString() const {
