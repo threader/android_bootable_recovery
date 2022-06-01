@@ -14,7 +14,7 @@ libkeymaster_messages libhardware libprotobuf-cpp-lite libfscrypt android.hardwa
 android.hardware.keymaster@3.0 libkeystore_binder libhidlbase libutils libbinder android.hardware.gatekeeper@1.0 \
 libfs_mgr android.hardware.keymaster@4.0 libkeymaster4support libf2fs_sparseblock libkeystore_parcelables \
 libkeystore_aidl android.hardware.weaver@1.0 libkeyutils liblog libhwbinder libchrome
-LOCAL_STATIC_LIBRARIES := libscrypt_static
+LOCAL_STATIC_LIBRARIES := libscrypt_static libc++fs
 LOCAL_C_INCLUDES := system/extras/ext4_utils \
     system/extras/ext4_utils/include/ext4_utils \
     external/scrypt/lib/crypto \
