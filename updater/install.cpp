@@ -57,6 +57,23 @@
 #include <ziparchive/zip_archive.h>
 
 #include "edify/expr.h"
+#include "otautil/error_code.h"
+#include "edify/updater_interface.h"
+#include "edify/updater_runtime_interface.h"
+ // Send over the buffer to recovery though the command pipe.
+ static void uiPrint(State* state, const std::string& buffer) {
+
+  // "line1\nline2\n" will be split into 3 tokens: "line1", "line2" and "".
+  // So skip sending empty strings to UI.
+  std::vector<std::string> lines = android::base::Split(buffer, "\n");
+  for (auto& line : lines) {
+    if (!line.empty()) {
+      fprintf(ui->cmd_pipe, "ui_print %s\n", line.c_str());
+      fprintf(ui->cmd_pipe, "ui_print\n");
+     }
+  }
+ 
+  // On the updater side, we need to dump the contents to stderr (which has
   // been redirected to the log file). Because the recovery will only print
   // the contents to screen when processing pipe command ui_print.
   LOG(INFO) << buffer;
