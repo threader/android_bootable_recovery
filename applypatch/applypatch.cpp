@@ -141,7 +141,7 @@ static bool WriteBufferToPartition(const FileContents& file_contents, const Part
   size_t len = file_contents.data.size();
   size_t start = 0;
   bool success = false;
-unsigned char buffer[4096];
+  unsigned char buffer[4096];
 
   for (size_t attempt = 0; attempt < 2; ++attempt) {
     android::base::unique_fd fd(open(partition.name.c_str(), O_RDWR));
