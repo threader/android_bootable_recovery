@@ -23,6 +23,8 @@
 #include <string>
 #include <vector>
 
+#include "edify/updater_interface.h"
+
 // Forward declaration to avoid including "otautil/error_code.h".
 enum ErrorCode : int;
 enum CauseCode : int;
