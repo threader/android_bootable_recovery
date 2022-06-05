@@ -157,7 +157,6 @@ void Updater::ParseAndReportErrorCode(State* state) {
 
 bool Updater::ReadEntryToString(ZipArchiveHandle za, const std::string& entry_name,
                                 std::string* content) {
-int32_t FindEntry(const ZipArchiveHandle archive, const ZipString& entryName, ZipEntry* data);
   ZipEntry entry;
   int find_err = FindEntry(za, entry_name, &entry);
   if (find_err != 0) {
