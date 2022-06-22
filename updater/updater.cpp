@@ -24,6 +24,8 @@
 #include <android-base/logging.h>
 #include <android-base/strings.h>
 
+#include <ziparchive/zip_archive.h>
+
 Updater::~Updater() {
   if (package_handle_) {
     CloseArchive(package_handle_);
@@ -52,7 +54,22 @@ bool Updater::Init(int fd, const std::string& package_filename, bool is_retry,
                << ErrorCodeString(open_err);
     return false;
   }
-  if (!ReadEntryToString(package_handle_, SCRIPT_NAME, &updater_script_)) {
+
+  ZipString script_name(SCRIPT_NAME);
+  ZipEntry script_entry;
+  int find_err = FindEntry(package_handle_, script_name, &script_entry);
+  if (find_err != 0) {
+    LOG(ERROR) << "failed to find " << SCRIPT_NAME << " in " << package_filename << ": "
+               << ErrorCodeString(find_err);
+    return false;
+  }
+
+  std::string script;
+  script.resize(script_entry.uncompressed_length);
+  int extract_err = ExtractToMemory(package_handle_, &script_entry, reinterpret_cast<uint8_t*>(&script[0]),
+                                    script_entry.uncompressed_length);
+  if (extract_err != 0) {
+    LOG(ERROR) << "failed to read script from package: " << ErrorCodeString(extract_err);
     return false;
   }
 
@@ -153,25 +170,4 @@ void Updater::ParseAndReportErrorCode(State* state) {
       fprintf(cmd_pipe_.get(), "retry_update\n");
     }
   }
-}
-
-bool Updater::ReadEntryToString(ZipArchiveHandle za, const std::string& entry_name,
-                                std::string* content) {
-  ZipEntry entry;
-  int find_err = FindEntry(za, entry_name, &entry);
-  if (find_err != 0) {
-    LOG(ERROR) << "failed to find " << entry_name
-               << " in the package: " << ErrorCodeString(find_err);
-    return false;
-  }
-
-  content->resize(entry.uncompressed_length);
-  int extract_err = ExtractToMemory(za, &entry, reinterpret_cast<uint8_t*>(&content->at(0)),
-                                    entry.uncompressed_length);
-  if (extract_err != 0) {
-    LOG(ERROR) << "failed to read script from package: " << ErrorCodeString(extract_err);
-    return false;
-  }
-
-  return true;
 }
