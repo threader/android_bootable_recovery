@@ -469,10 +469,9 @@ ifeq ($(TW_INCLUDE_DUMLOCK), true)
     include $(BUILD_PREBUILT)
 endif
 
-ifeq ($(TW_USE_TOOLBOXY), true)
+ifeq ($(TW_USE_TOOLBOX), true)
    include $(CLEAR_VARS)
    LOCAL_MODULE := mkshrc_twrp
-   LOCAL_MODULE_STEM := mkshrc
    LOCAL_MODULE_TAGS := optional
    LOCAL_MODULE_CLASS := ETC
    LOCAL_MODULE_PATH := $(TARGET_RECOVERY_ROOT_OUT)/system/etc
