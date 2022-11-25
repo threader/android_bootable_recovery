@@ -63,7 +63,8 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
     fuse_adb_provider.cpp \
-    ../fuse_sideload.cpp \
+    ../fuse_sideload/fuse_provider.cpp \
+    ../fuse_sideload/fuse_sideload.cpp \
     minadbd.cpp \
     minadbd_services.cpp \
 
@@ -73,7 +74,7 @@ LOCAL_CFLAGS := $(minadbd_cflags) -Wno-unused-parameter
 LOCAL_CONLY_FLAGS := -Wimplicit-function-declaration
 LOCAL_CFLAGS +=  -std=gnu++2a
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/.. system/core/adb
-LOCAL_SHARED_LIBRARIES := libadbd libbase liblog libcutils libc
+LOCAL_SHARED_LIBRARIES := libadbd libbase liblog libcutils libc libcrypto
 #LOCAL_STATIC_LIBRARIES := libbase liblog libcutils libc
 
 ifeq ($shell test $(PLATFORM_SDK_VERSION) -lt 29; echo $$?),0)
