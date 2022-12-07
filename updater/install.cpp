@@ -1029,10 +1029,8 @@ Value* Tune2FsFn(const char* name, State* state, const std::vector<std::unique_p
     return ErrorAbort(state, kTune2FsFailure, "%s() returned error code %d", name, result);
   }
   return StringValue("t");
-/*#else
   return ErrorAbort(state, kTune2FsFailure, "%s() support not present, no libtune2fs", name);
-#endif // HAVE_LIBTUNE2FS
-*/
+//#endif // HAVE_LIBTUNE2FS
 }
 
 void RegisterInstallFunctions() {

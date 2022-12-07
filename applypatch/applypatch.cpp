@@ -197,7 +197,7 @@ static bool WriteBufferToPartition(const FileContents& file_contents, const Part
                     if (to_read > sizeof(buffer)) {
                         to_read = sizeof(buffer);
                     }
-if (!android::base::ReadFully(fd, buffer, to_read)) {
+	 if (!android::base::ReadFully(fd, buffer, to_read)) {
         PLOG(ERROR) << "Failed to verify-read " << partition << " at " << p;
         return false;
       }
@@ -219,7 +219,7 @@ if (!android::base::ReadFully(fd, buffer, to_read)) {
       PLOG(ERROR) << "Failed to close " << partition;
       return false;
     }
-  }
+  } /*attempt*/
 
   if (!success) {
     LOG(ERROR) << "Failed to verify after all attempts";
