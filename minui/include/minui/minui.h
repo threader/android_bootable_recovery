@@ -17,22 +17,37 @@
 #ifndef _MINUI_H_
 #define _MINUI_H_
 
-#ifndef TW_USE_OLD_MINUI_H
+#ifndef TW_USE_MINUI_21
 
 #include <sys/types.h>
 
 #include <functional>
+#include <string>
+#include <vector>
 
 //
 // Graphics.
 //
 
 struct GRSurface {
-    int width;
-    int height;
-    int row_bytes;
-    int pixel_bytes;
-    unsigned char* data;
+  int width;
+  int height;
+  int row_bytes;
+  int pixel_bytes;
+  unsigned char* data;
+};
+
+struct GRFont {
+  GRSurface* texture;
+  int char_width;
+  int char_height;
+};
+
+enum GRRotation {
+  ROTATION_NONE = 0,
+  ROTATION_RIGHT = 1,
+  ROTATION_DOWN = 2,
+  ROTATION_LEFT = 3,
 };
 
 int gr_init();
@@ -47,15 +62,28 @@ void gr_fb_blank(bool blank);
 void gr_clear();  // clear entire surface to current color
 void gr_color(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 void gr_fill(int x1, int y1, int x2, int y2);
-void gr_text(int x, int y, const char *s, bool bold);
+
 void gr_texticon(int x, int y, GRSurface* icon);
+#ifdef TW_NO_MINUI_CUSTOM_FONTS
+void gr_text(int x, int y, const char *s, bool bold);
 int gr_measure(const char *s);
 void gr_font_size(int *x, int *y);
 void gr_set_font(__attribute__ ((unused))const char* name);
+#else
+
+const GRFont* gr_sys_font();
+int gr_init_font(const char* name, GRFont** dest);
+void gr_text(const GRFont* font, int x, int y, const char* s, bool bold);
+int gr_measure(const GRFont* font, const char* s);
+void gr_font_size(const GRFont* font, int* x, int* y);
+#endif
 
 void gr_blit(GRSurface* source, int sx, int sy, int w, int h, int dx, int dy);
 unsigned int gr_get_width(GRSurface* surface);
 unsigned int gr_get_height(GRSurface* surface);
+
+// Set rotation, flips gr_fb_width/height if 90 degree rotation difference
+void gr_rotate(GRRotation rotation);
 
 //
 // Input events.
@@ -63,15 +91,28 @@ unsigned int gr_get_height(GRSurface* surface);
 
 struct input_event;
 
-// TODO: move these over to std::function.
+#ifdef TW_USE_MINUI_WITH_DATA
 typedef int (*ev_callback)(int fd, uint32_t epevents, void* data);
 typedef int (*ev_set_key_callback)(int code, int value, void* data);
 
 int ev_init(ev_callback input_cb, void* data);
-void ev_exit();
 int ev_add_fd(int fd, ev_callback cb, void* data);
-void ev_iterate_available_keys(std::function<void(int)> f);
 int ev_sync_key_state(ev_set_key_callback set_key_cb, void* data);
+#else
+using ev_callback = std::function<int(int fd, uint32_t epevents)>;
+using ev_set_key_callback = std::function<int(int code, int value)>;
+
+#ifdef TW_USE_MINUI_WITH_OPTIONAL_TOUCH_EVENTS
+int ev_init(ev_callback input_cb, bool allow_touch_inputs = false);
+void ev_iterate_touch_inputs(const std::function<void(int)>& action);
+#else
+int ev_init(ev_callback input_cb);
+#endif
+int ev_add_fd(int fd, ev_callback cb);
+int ev_sync_key_state(const ev_set_key_callback& set_key_cb);
+#endif
+void ev_exit();
+void ev_iterate_available_keys(const std::function<void(int)>& f);
 
 // 'timeout' has the same semantics as poll(2).
 //    0 : don't block
@@ -86,6 +127,8 @@ int ev_get_epollfd();
 //
 // Resources
 //
+
+bool matches_locale(const std::string& prefix, const std::string& locale);
 
 // res_create_*_surface() functions return 0 if no error, else
 // negative.
@@ -104,8 +147,10 @@ int res_create_display_surface(const char* name, GRSurface** pSurface);
 // should have a 'Frames' text chunk whose value is the number of
 // frames this image represents.  The pixel data itself is interlaced
 // by row.
-int res_create_multi_display_surface(const char* name,
-                                     int* frames, GRSurface*** pSurface);
+int res_create_multi_display_surface(const char* name, int* frames,
+                                     int* fps, GRSurface*** pSurface);
+int res_create_multi_display_surface(const char* name, int* frames,
+                                     GRSurface*** pSurface);
 
 // Load a single alpha surface from a grayscale PNG image.
 int res_create_alpha_surface(const char* name, GRSurface** pSurface);
@@ -114,18 +159,21 @@ int res_create_alpha_surface(const char* name, GRSurface** pSurface);
 // given locale.  The image is expected to be a composite of multiple
 // translations of the same text, with special added rows that encode
 // the subimages' size and intended locale in the pixel data.  See
-// development/tools/recovery_l10n for an app that will generate these
-// specialized images from Android resources.
+// bootable/recovery/tools/recovery_l10n for an app that will generate
+// these specialized images from Android resources.
 int res_create_localized_alpha_surface(const char* name, const char* locale,
                                        GRSurface** pSurface);
+
+// Return a list of locale strings embedded in |png_name|. Return a empty list in case of failure.
+std::vector<std::string> get_locales_in_png(const std::string& png_name);
 
 // Free a surface allocated by any of the res_create_*_surface()
 // functions.
 void res_free_surface(GRSurface* surface);
 
-#else //ifndef TW_USE_OLD_MINUI_H
+#else //ifndef TW_USE_MINUI_21
 
-// This the old minui.old/minui.h for compatibility with building TWRP
+// This the old minui21/minui.h for compatibility with building TWRP
 // in pre 6.0 trees.
 
 #include <stdbool.h>
@@ -213,5 +261,5 @@ void gr_clear();
 }
 #endif
 
-#endif // ifndef TW_USE_OLD_MINUI_H
+#endif // ifndef TW_USE_MINUI_21
 #endif // ifndef _MINUI_H_

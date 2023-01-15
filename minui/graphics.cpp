@@ -419,6 +419,12 @@ static void gr_init_font(void)
     }
 }
 
+void gr_set_font(__attribute__ ((unused))const char* name) {
+	//this cm function is made to change font. Don't care, just init the font:
+	gr_init_font();
+	return;
+}
+
 #if 0
 // Exercises many of the gr_*() functions; useful for testing.
 static void gr_test() {
